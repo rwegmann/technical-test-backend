@@ -21,6 +21,8 @@
 		<java.version>17</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
+		
+		<version.openapi-generator-maven-plugin>7.9.0</version.openapi-generator-maven-plugin>
 	</properties>
 
 
@@ -60,14 +62,65 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+		</dependency>
+		
 	</dependencies>
 
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.openapitools</groupId>
+					<artifactId>openapi-generator-maven-plugin</artifactId>
+					<version>${version.openapi-generator-maven-plugin}</version>
+					<configuration>
+						<skipValidateSpec>true</skipValidateSpec>
+						<inputSpec>./src/main/openapi/wallet-openapi.yml</inputSpec>
+						<generatorName>spring</generatorName>
+						<configOptions>
+							<useSpringBoot3>true</useSpringBoot3>
+							<openApiNullable>false</openApiNullable>
+							<interfaceOnly>true</interfaceOnly>
+							<skipDefaultInterface>true</skipDefaultInterface>
+							<annotationLibrary>none</annotationLibrary>
+							<documentationProvider>none</documentationProvider>
+							<basePackage>com.playtomic.tests.wallet</basePackage>
+							<invokerPackage>com.playtomic.tests.wallet</invokerPackage>
+							<apiPackage>com.playtomic.tests.wallet.api</apiPackage>
+							<modelPackage>com.playtomic.tests.wallet.model</modelPackage>
+						</configOptions>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+<!--			
+			<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>${version.openapi-generator-maven-plugin}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+-->
 		</plugins>
 	</build>
 </project>
