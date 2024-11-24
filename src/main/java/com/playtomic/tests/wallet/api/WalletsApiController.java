@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.playtomic.tests.wallet.model.Transaction;
 import com.playtomic.tests.wallet.model.Wallet;
 import com.playtomic.tests.wallet.model.WalletPurchaseRequest;
-import com.playtomic.tests.wallet.model.WalletTransactionResponse;
 import com.playtomic.tests.wallet.model.WalletTopUpRequest;
+import com.playtomic.tests.wallet.model.WalletTransactionResponse;
 import com.playtomic.tests.wallet.persistence.WalletRepository;
 import com.playtomic.tests.wallet.service.StripeAmountTooSmallException;
 import com.playtomic.tests.wallet.service.StripeService;
@@ -32,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1")
 @Transactional
 public class WalletsApiController implements WalletsApi {
-    private Logger log = LoggerFactory.getLogger(WalletsApiController.class);
 
     @NonNull
     private final StripeService stripeService;
