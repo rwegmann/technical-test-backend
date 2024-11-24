@@ -1,0 +1,244 @@
+openapi: 3.0.3
+info:
+  title: Playtomic Wallet API
+  version: 1.0.0
+  description: >-
+    API for the wallet containing the funds that may be spent 
+    on Playtomic's platform
+servers:
+  - url: http://localhost:8090/api/v1
+tags:
+  - name: wallets
+    description: Everything related to wallets
+  - name: transactions
+    description: Everything related to wallet transactions
+paths:
+  /wallets:
+    get:
+      summary: 'Get all wallets'
+      operationId: getAllWallets
+      responses:
+        '200':
+           description: successful operation
+           content:
+             application/json:
+               schema:
+                 type: array
+                 items:
+                   $ref: '#/components/schemas/Wallet'
+      tags:
+        - wallets
+    post:
+      summary: 'Create a new wallet'
+      operationId: createWallet
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+      tags:
+        - wallets
+  /wallets/{walletId}:
+    parameters:
+      - name: walletId
+        in: path
+        description: ID of wallet
+        required: true
+        schema:
+          $ref: '#/components/schemas/WalletId'
+    get:
+      summary: 'Get a wallet by its ID'
+      operationId: getWalletById
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+      tags:
+        - wallets
+    delete:
+      summary: 'Delete a wallet'
+      operationId: deleteWallet
+      responses:
+        '200':
+          description: successful operation
+      tags:
+        - wallets
+        
+  /wallets/{walletId}/topUp:
+    post:
+      summary: 'Top up a wallet'
+      operationId: topUpWallet
+      parameters:
+        - name: walletId
+          in: path
+          description: ID of wallet
+          required: true
+          schema:
+            $ref: '#/components/schemas/WalletId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletTopUpRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransactionResponse'
+      tags:
+        - wallets
+  /wallets/{walletId}/purchase:
+    post:
+      summary: 'Purchase '
+      operationId: purchaseWithWallet
+      parameters:
+        - name: walletId
+          in: path
+          description: ID of wallet
+          required: true
+          schema:
+            $ref: '#/components/schemas/WalletId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletPurchaseRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransactionResponse'
+      tags:
+        - wallets
+  /wallets/{walletId}/transactions:
+    parameters:
+      - name: walletId
+        in: path
+        description: ID of wallet
+        required: true
+        schema:
+          $ref: '#/components/schemas/WalletId'
+    get:
+      summary: 'Get all transactions of a wallet'
+      operationId: getAllWalletTransactions
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+      tags:
+        - transactions
+  /wallets/{walletId}/transactions/{transactionId}:
+    parameters:
+      - name: walletId
+        in: path
+        description: ID of wallet
+        required: true
+        schema:
+          $ref: '#/components/schemas/WalletId'
+      - name: transactionId
+        in: path
+        description: ID of a wallet transaction
+        required: true
+        schema:
+          $ref: '#/components/schemas/TransactionId'
+    get:
+      summary: 'Get a transaction by its ID'
+      operationId: getTransactionById
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+      tags:
+        - transactions
+components:
+  schemas:
+    WalletId:
+      type: integer
+      format: int64
+      example: 10
+    Wallet:
+      type: object
+      required:
+        - balance
+      properties:
+        id:
+          $ref: '#/components/schemas/WalletId'
+        balance:
+          type: number
+    WalletTopUpRequest:
+      type: object
+      required:
+        - creditCard
+        - amount
+      properties:
+        amount:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          example: 20.00
+        creditCard:
+          type: string
+          example: "1234 5678 9101 1121"
+    WalletPurchaseRequest:
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          type: number
+          minimum: 0
+          example: 20.00
+        description:
+          type: string
+          maxLength: 255
+          example: "pitch rental"
+    WalletTransactionResponse:
+      type: object
+      properties:
+        wallet:
+          $ref: '#/components/schemas/Wallet'
+        transaction:
+          $ref: '#/components/schemas/Transaction'
+    TransactionId:
+      type: integer
+      format: int64
+      example: 10
+    Transaction:
+      type: object
+      required:
+        - amount
+      properties:
+        id:
+          $ref: '#/components/schemas/TransactionId'
+        walletId:
+          $ref: '#/components/schemas/WalletId'
+        amount:
+          type: number
+          example: -10.50
+        description:
+          type: string
+          maxLength: 255
+          example: "pitch rental"
+        previousBalance:
+          type: number
+          example: 20.50
+        newBalance:
+          type: number
+          example: 10.00
