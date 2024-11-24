@@ -18,6 +18,7 @@ import com.playtomic.tests.wallet.model.WalletPurchaseRequest;
 import com.playtomic.tests.wallet.model.WalletTopUpRequest;
 import com.playtomic.tests.wallet.model.WalletTransactionResponse;
 import com.playtomic.tests.wallet.persistence.WalletRepository;
+import com.playtomic.tests.wallet.service.Payment;
 import com.playtomic.tests.wallet.service.StripeAmountTooSmallException;
 import com.playtomic.tests.wallet.service.StripeService;
 import com.playtomic.tests.wallet.service.StripeServiceException;
@@ -74,9 +75,13 @@ public class WalletsApiController implements WalletsApi {
         // ensure wallet exists 
         Wallet wallet = walletRepository.getByIdForUpdate(walletId);
         
-        // charge credit card
         try {
-            stripeService.charge(card, amount);
+            // charge credit card
+            Payment payment = stripeService.charge(card, amount);
+            
+            // register transaction
+            String description = "Top Up: paymentId = " + payment.getId();
+            return addWalletTransaction(wallet.getId(), request.getAmount(), description);
         }
         catch (StripeAmountTooSmallException ex) {
             throw new CreditCardAmountTooSmallException(walletId, ex);
@@ -85,8 +90,6 @@ public class WalletsApiController implements WalletsApi {
             throw new CreditCardTransactionException(walletId, ex);
         }
         
-        // register transaction
-        return addWalletTransaction(wallet.getId(), request.getAmount(), request.getCreditCard());
     }
 
     @Override
