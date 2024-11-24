@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2024-11-23T10:02:26.168473700+01:00[Europe/Madrid]", comments = "Generator version: 7.9.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2024-11-24T17:30:46.589626900+01:00[Europe/Madrid]", comments = "Generator version: 7.9.0")
 @Validated
 public interface WalletsApi {
 
@@ -50,6 +50,7 @@ public interface WalletsApi {
      *
      * @param walletId ID of wallet (required)
      * @return successful operation (status code 200)
+     *         or wallet not found (status code 404)
      */
     @RequestMapping(
         method = RequestMethod.DELETE,
@@ -66,6 +67,7 @@ public interface WalletsApi {
      *
      * @param walletId ID of wallet (required)
      * @return successful operation (status code 200)
+     *         or wallet not found (status code 404)
      */
     @RequestMapping(
         method = RequestMethod.GET,
@@ -100,6 +102,7 @@ public interface WalletsApi {
      * @param walletId ID of wallet (required)
      * @param transactionId ID of a wallet transaction (required)
      * @return successful operation (status code 200)
+     *         or transaction not found (status code 404)
      */
     @RequestMapping(
         method = RequestMethod.GET,
@@ -118,6 +121,7 @@ public interface WalletsApi {
      *
      * @param walletId ID of wallet (required)
      * @return successful operation (status code 200)
+     *         or wallet not found (status code 404)
      */
     @RequestMapping(
         method = RequestMethod.GET,
@@ -136,6 +140,8 @@ public interface WalletsApi {
      * @param walletId ID of wallet (required)
      * @param walletPurchaseRequest  (optional)
      * @return successful operation (status code 200)
+     *         or wallet has insufficient funds (status code 402)
+     *         or wallet not found (status code 404)
      */
     @RequestMapping(
         method = RequestMethod.POST,
@@ -156,6 +162,9 @@ public interface WalletsApi {
      * @param walletId ID of wallet (required)
      * @param walletTopUpRequest  (optional)
      * @return successful operation (status code 200)
+     *         or wallet not found (status code 404)
+     *         or amount is too small to bee charged by credit card (status code 422)
+     *         or failed to charge credit card using payment provider (status code 502)
      */
     @RequestMapping(
         method = RequestMethod.POST,

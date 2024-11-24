@@ -38,54 +38,46 @@ public class WalletsApiController implements WalletsApi {
     private final WalletRepository walletRepository;
     
     @Override
-    public ResponseEntity<Wallet> createWallet() {
-        Wallet wallet = walletRepository.create();
-        return new ResponseEntity<>(wallet, HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<Void> deleteWallet(Long walletId) throws NoSuchWalletException {
-        walletRepository.deleteById(walletId);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<List<Transaction>> getAllWalletTransactions(Long walletId) throws NoSuchWalletException {
-        List<Transaction> transactions = walletRepository.findAllWalletTransactions(walletId);
-        return new ResponseEntity<>(transactions, HttpStatus.OK);
-    }
-
-    @Override
     public ResponseEntity<List<Wallet>> getAllWallets() {
         List<Wallet> wallets = walletRepository.findAll();
         return new ResponseEntity<>(wallets, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Transaction> getTransactionById(Long walletId, Long transactionId) throws NoSuchTransactionException {
-        Optional<Transaction> optional = walletRepository.findWalletTransactionById(transactionId);
-        Transaction transaction = optional.orElse(null);
-        if ((transaction == null) || !transaction.getWalletId().equals(walletId) ) {
-            throw new NoSuchTransactionException(walletId, transactionId);
-        }
-        return new ResponseEntity<>(transaction, HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<Wallet> getWalletById(Long walletId) throws NoSuchWalletException {
-        Wallet wallet= walletRepository.getById(walletId);
+    public ResponseEntity<Wallet> createWallet() {
+        Wallet wallet = walletRepository.create();
         return new ResponseEntity<>(wallet, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<WalletTransactionResponse> topUpWallet(Long walletId, WalletTopUpRequest request) throws NoSuchWalletException, CreditCardTransactionException {
+    public ResponseEntity<Wallet> getWalletById(Long walletId) throws NoSuchWalletException {
+        Assert.notNull(walletId, "walletId is null");
+        Wallet wallet = walletRepository.getById(walletId);
+        return new ResponseEntity<>(wallet, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteWallet(Long walletId) throws NoSuchWalletException {
+        Assert.notNull(walletId, "walletId is null");
+        walletRepository.deleteById(walletId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<WalletTransactionResponse> topUpWallet(Long walletId, @Valid WalletTopUpRequest request) throws NoSuchWalletException, CreditCardTransactionException, CreditCardAmountTooSmallException {
+        Assert.notNull(walletId, "walletId is null");
+        Assert.notNull(request, "request is null");
+        
+        String card = request.getCreditCard();
+        BigDecimal amount = request.getAmount();
+        Assert.hasText(card, "creditCard is empty or null");
+        Assert.notNull(amount, "amount is null");
+        Assert.isTrue(amount.compareTo(BigDecimal.ZERO) > 0, "amount must be positive");
+        
         // ensure wallet exists 
         Wallet wallet = walletRepository.getByIdForUpdate(walletId);
         
         // charge credit card
-        @NonNull String card = request.getCreditCard();
-        @NonNull BigDecimal amount = request.getAmount();
-        Assert.isTrue(amount.compareTo(BigDecimal.ZERO) > 0, "amount must be positive");
         try {
             stripeService.charge(card, amount);
         }
@@ -106,7 +98,23 @@ public class WalletsApiController implements WalletsApi {
         String description = request.getDescription();
         return addWalletTransaction(walletId, amount, description);
     }
-    
+
+    @Override
+    public ResponseEntity<List<Transaction>> getAllWalletTransactions(Long walletId) throws NoSuchWalletException {
+        List<Transaction> transactions = walletRepository.findAllWalletTransactions(walletId);
+        return new ResponseEntity<>(transactions, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Transaction> getTransactionById(Long walletId, Long transactionId) throws NoSuchTransactionException {
+        Optional<Transaction> optional = walletRepository.findWalletTransactionById(transactionId);
+        Transaction transaction = optional.orElse(null);
+        if ((transaction == null) || !transaction.getWalletId().equals(walletId) ) {
+            throw new NoSuchTransactionException(walletId, transactionId);
+        }
+        return new ResponseEntity<>(transaction, HttpStatus.OK);
+    }
+
     public ResponseEntity<WalletTransactionResponse> addWalletTransaction(Long walletId, BigDecimal amount, String description) throws NoSuchWalletException, InsufficientFundsException {
         Transaction transaction = walletRepository.addWalletTransaction(walletId, amount, description);
         Wallet wallet = walletRepository.getById(walletId);

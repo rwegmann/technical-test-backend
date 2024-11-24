@@ -58,6 +58,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Wallet'
+        '404':
+          description: wallet not found
       tags:
         - wallets
     delete:
@@ -66,6 +68,8 @@ paths:
       responses:
         '200':
           description: successful operation
+        '404':
+          description: wallet not found
       tags:
         - wallets
         
@@ -92,6 +96,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WalletTransactionResponse'
+        '404':
+          description: wallet not found
+        '422':
+          description: amount is too small to bee charged by credit card
+        '502':
+          description: failed to charge credit card using payment provider
+        
       tags:
         - wallets
   /wallets/{walletId}/purchase:
@@ -117,6 +128,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WalletTransactionResponse'
+        '402':
+          description: wallet has insufficient funds
+        '404':
+          description: wallet not found
       tags:
         - wallets
   /wallets/{walletId}/transactions:
@@ -139,6 +154,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Transaction'
+        '404':
+          description: wallet not found
       tags:
         - transactions
   /wallets/{walletId}/transactions/{transactionId}:
@@ -165,6 +182,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transaction'
+        '404':
+          description: transaction not found
       tags:
         - transactions
 components:
