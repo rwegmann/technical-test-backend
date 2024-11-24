@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,12 +23,14 @@ import com.playtomic.tests.wallet.service.StripeService;
 import com.playtomic.tests.wallet.service.StripeServiceException;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
+@Validated
 @Transactional
 public class WalletsApiController implements WalletsApi {
 
@@ -65,14 +68,8 @@ public class WalletsApiController implements WalletsApi {
 
     @Override
     public ResponseEntity<WalletTransactionResponse> topUpWallet(Long walletId, @Valid WalletTopUpRequest request) throws NoSuchWalletException, CreditCardTransactionException, CreditCardAmountTooSmallException {
-        Assert.notNull(walletId, "walletId is null");
-        Assert.notNull(request, "request is null");
-        
         String card = request.getCreditCard();
         BigDecimal amount = request.getAmount();
-        Assert.hasText(card, "creditCard is empty or null");
-        Assert.notNull(amount, "amount is null");
-        Assert.isTrue(amount.compareTo(BigDecimal.ZERO) > 0, "amount must be positive");
         
         // ensure wallet exists 
         Wallet wallet = walletRepository.getByIdForUpdate(walletId);
